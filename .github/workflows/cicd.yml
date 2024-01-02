@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew bootJar
 
       - name: Test ls -al
-        run: ls -al
+        run: ls -al build/libs
 
       
 
