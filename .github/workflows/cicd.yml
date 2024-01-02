@@ -27,10 +27,10 @@ jobs:
           #   ./**/gradle-wrapper.properties
 
       - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew
+        run: chmod +x ./gradlew
 
       - name: Build Project
-        run: ./gradlew build
+        run: ./gradlew bootJar
 
       # - name: Get Github Actions IP
       #   id: ip
