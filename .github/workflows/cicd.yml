@@ -25,10 +25,12 @@ jobs:
           # cache-dependency-path: |
           #   ./*.gradle*
           #   ./**/gradle-wrapper.properties
-      - run: ./gradlew build --no-daemon
 
-      - name: Grant execute permission for gradlew
+      - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
+
+      - name: Build Project
+        run: ./gradlew build
 
       # - name: Get Github Actions IP
       #   id: ip
