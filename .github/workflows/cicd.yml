@@ -52,13 +52,17 @@ jobs:
           # TARGET: ${{ secrets.EC2_TARGET_DIR }}
           SOURCE: "./build/libs"
           SCRIPT_BEFORE: |
-            sudo su
-            rm -rf /var/www/moongi-dev/dist
+            if [ -n "$EXISTING_PID" ]; then
+              echo "Existing Java process found on port $PORT_NUMBER."
+              sudo kill -9 $EXISTING_PID
+              echo "kill $PORT_NUMBER port "
+            else
+              echo "No existing Java process found on port $PORT_NUMBER."
+            fi
+                  
           SCRIPT_AFTER:  |
             sudo su
-            chmod 777 -R /var/www/moongi-dev/
-            service nginx stop
-            service nginx start
+            nohup java -jar freedom-day-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
 
       - name: Remove Github Actions IP From Security Group
         run: aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
