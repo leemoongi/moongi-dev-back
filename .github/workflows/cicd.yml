@@ -63,6 +63,8 @@ jobs:
                   
           SCRIPT_AFTER:  |
             echo "SCRIPT_AFTER start"
+            echo "$JAVA_HOME"
+            java -version
             sudo su
             nohup java -jar moongi-dev-back-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
             echo "SCRIPT_AFTER end"
