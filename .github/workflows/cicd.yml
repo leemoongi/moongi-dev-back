@@ -52,6 +52,7 @@ jobs:
           # TARGET: ${{ secrets.EC2_TARGET_DIR }}
           SOURCE: "./build/libs/moongi-dev-back-0.0.1-SNAPSHOT.jar"
           SCRIPT_BEFORE: |
+            EXISTING_PID=$(sudo lsof -t -i :${PORT_NUMBER} -sTCP:LISTEN)
             if [ -n "$EXISTING_PID" ]; then
               echo "Existing Java process found on port $PORT_NUMBER."
               sudo kill -9 $EXISTING_PID
@@ -61,8 +62,12 @@ jobs:
             fi
                   
           SCRIPT_AFTER:  |
+            echo "SCRIPT_AFTER start"
             sudo su
             nohup java -jar moongi-dev-back-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
+            echo "SCRIPT_AFTER end"
+            ps -ef | grep .jar
+            
 
       - name: Remove Github Actions IP From Security Group
         run: aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
