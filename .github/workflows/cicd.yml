@@ -60,7 +60,6 @@ jobs:
             else
               echo "No existing Java process found on port $PORT_NUMBER."
             fi
-                  
           SCRIPT_AFTER:  |
             echo "SCRIPT_AFTER start"
             sudo su
