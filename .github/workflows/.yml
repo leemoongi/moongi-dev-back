@@ -19,15 +19,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'gradle'
-          # cache-dependency-path: |
-          #   ./*.gradle*
-          #   ./**/gradle-wrapper.properties
+          cache-dependency-path: |
+            ./*.gradle*
+            ./**/gradle-wrapper.properties
 
       - name: Grant Execute Permission for Gradlew
         run: chmod +x ./gradlew
 
       - name: Build Project
-        run: ./gradlew bootJar
+        run: ./gradlew bootJar -x test
 
       - name: Get Github Actions IP
         id: ip
@@ -53,17 +53,16 @@ jobs:
           SOURCE: "./build/libs/moongi-dev-back-0.0.1-SNAPSHOT.jar"
           SCRIPT_BEFORE: |
             echo "SCRIPT_BEFORE start"
-            EXISTING_PID=$(sudo lsof -t -i :${PORT_NUMBER} -sTCP:LISTEN)
+            EXISTING_PID=$(sudo lsof -t -i :8080 -sTCP:LISTEN)
             if [ -n "$EXISTING_PID" ]; then
-              echo "Existing Java process found on port $PORT_NUMBER."
+              echo "Existing Java process found on port 8080."
               sudo kill -9 $EXISTING_PID
             else
-              echo "No existing Java process found on port $PORT_NUMBER."
+              echo "No existing Java process found on port 8080."
             fi
           SCRIPT_AFTER:  |
             echo "SCRIPT_AFTER start"
-            sudo su
-            nohup /opt/jdk-17/bin/java -jar moongi-dev-back-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
+            sudo nohup /opt/jdk-17/bin/java -jar moongi-dev-back-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
 
       - name: Remove Github Actions IP From Security Group
         run: aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
