@@ -1,4 +1,4 @@
-PROJECT_ROOT="/home/ec2-user/moongi-dev"
+PROJECT_ROOT="/home/ec2-user/moongi-dev-back"
 JAR_FILE="$PROJECT_ROOT/moongi-dev-back-0.0.1-SNAPSHOT.jar"
 
 APP_LOG="$PROJECT_ROOT/application.log"
