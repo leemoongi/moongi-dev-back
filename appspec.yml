@@ -11,10 +11,10 @@ files:
 # https://docs.aws.amazon.com/ko_kr/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html
 hooks:
   AfterInstall: 
-    - location: script/stop.sh
+    - location: stop.sh
       timeout: 60
       runas: root                   # 스크립트 실행 계정
   ApplicationStart:
-    - location: script/start.sh
+    - location: start.sh
       timeout: 60
       runas: root
