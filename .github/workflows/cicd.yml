@@ -3,7 +3,13 @@ on:
   push:
     branches:
       - 'main'
-  
+
+env:
+  AWS_REGION: ap-northeast-2
+  S3_BUCKET_NAME: moongi-dev-github-actions-s3-buket
+  CODE_DEPLOY_APPLICATION_NAME: moongi-dev-back
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: my-code-deploy-group
+
 jobs:
   cicd:
     runs-on: ubuntu-latest
@@ -29,10 +35,6 @@ jobs:
       - name: Build Project
         run: ./gradlew bootJar -x test
 
-      - name: Get Github Actions IP
-        id: ip
-        uses: haythem/public-ip@v1.3
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -40,29 +42,18 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      - name: Add Github Actions IP to Security group
-        run: aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+      - name: Upload to AWS S3
+        run: |
+          aws deploy push \
+            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+            --ignore-hidden-files \
+            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+            --source .
 
-      - name: Deploy to EC2
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.EC2_HOST }}
-          REMOTE_USER: ${{ secrets.EC2_USERNAME }}
-          # TARGET: ${{ secrets.EC2_TARGET_DIR }}
-          SOURCE: "./build/libs/moongi-dev-back-0.0.1-SNAPSHOT.jar"
-          SCRIPT_BEFORE: |
-            echo "SCRIPT_BEFORE start"
-            EXISTING_PID=$(sudo lsof -t -i :8080 -sTCP:LISTEN)
-            if [ -n "$EXISTING_PID" ]; then
-              echo "Existing Java process found on port 8080."
-              sudo kill -9 $EXISTING_PID
-            else
-              echo "No existing Java process found on port 8080."
-            fi
-          SCRIPT_AFTER:  |
-            echo "SCRIPT_AFTER start"
-            sudo nohup /opt/jdk-17/bin/java -jar moongi-dev-back-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev &
-
-      - name: Remove Github Actions IP From Security Group
-        run: aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+      - name: Deploy to AWS EC2 from S3
+        run: |
+          aws deploy create-deployment \
+            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
