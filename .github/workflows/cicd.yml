@@ -35,21 +35,30 @@ jobs:
       - name: Build Project
         run: ./gradlew bootJar -x test
 
+      - name: Make zip file
+        run: zip -r ./code-deploy.zip ./build/libs/*.jar ./scripts/* -j ./appspec.yml
+        shell: bash
+        
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2
+          aws-region: ${{ env.AWS_REGION }}
 
-      # https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-push.html#push-with-cli
       - name: Upload to AWS S3
-        run: |
-          aws deploy push \
-            --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-            --ignore-hidden-files \
-            --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
-            --source build/libs
+        run: aws s3 cp --region ap-northeast-2 ./code-deploy.zip s3://${{ env. S3_BUCKET_NAME }}/code-deploy.zip
+
+      # # https://docs.aws.amazon.com/codedeploy/latest/userguide/application-revisions-push.html#push-with-cli
+      # - name: Upload to AWS S3
+      #   run: |
+      #     aws deploy push \
+      #       --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+      #       --ignore-hidden-files \
+      #       --s3-location s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip \
+      #       --source build/libs
+
+
 
       - name: Deploy to AWS EC2 from S3
         run: |
