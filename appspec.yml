@@ -3,7 +3,7 @@ os: linux
 
 # https://docs.aws.amazon.com/ko_kr/codedeploy/latest/userguide/reference-appspec-file-structure-files.html
 files:
-  - source:  /
+  - source:  /build/libs/
     destination: /home/ec2-user/moongi-dev-back # 지정한 파일을 받을 위치
     overwrite: yes
 
