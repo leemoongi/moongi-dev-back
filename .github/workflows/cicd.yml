@@ -36,7 +36,7 @@ jobs:
         run: ./gradlew bootJar -x test
 
       - name: Make zip file
-        run: zip -r ./code-deploy.zip ./build/libs/*.jar ./scripts/* -j ./appspec.yml
+        run: zip -r ./code-deploy.zip ./build/libs/*.jar ./script/* -j ./appspec.yml
         shell: bash
         
       - name: Configure AWS Credentials
@@ -59,11 +59,10 @@ jobs:
       #       --source build/libs
 
 
-
       - name: Deploy to AWS EC2 from S3
         run: |
           aws deploy create-deployment \
             --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
             --deployment-config-name CodeDeployDefault.AllAtOnce \
             --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-            --s3-location bucket=$S3_BUCKET_NAME,key=$GITHUB_SHA.zip,bundleType=zip
+            --s3-location bucket=$S3_BUCKET_NAME,key=code-deploy.zip,bundleType=zip
