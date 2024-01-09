@@ -7,7 +7,7 @@ DEPLOY_LOG="$PROJECT_ROOT/deploy.log"
 
 TIME_NOW=$(date +%c)
 
-source /home/ec2-user/.bash_profile
+source ~/.bash_profile
 
 # jar 파일 실행
 echo "start.sh 시작" >> $DEPLOY_LOG
