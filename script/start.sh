@@ -1,5 +1,7 @@
-echo "$rds_host"
-echo "$rds_username"
+
+echo "start.sh 시작" >> $DEPLOY_LOG
+echo "$rds_host" >> $DEPLOY_LOG
+echo "$rds_username" >> $DEPLOY_LOG
 
 PROJECT_ROOT="/home/ec2-user/moongi-dev-back"
 JAR_FILE="$PROJECT_ROOT/moongi-dev-back-0.0.1-SNAPSHOT.jar"
