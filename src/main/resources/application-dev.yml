@@ -11,7 +11,7 @@ spring:
     username: ${rds_username}
     password: ${rds_password}
 
-  # JPA
+  # JPA test
   jpa:
     hibernate:
       ddl-auto: none
